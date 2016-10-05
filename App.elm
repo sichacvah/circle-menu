@@ -1,3 +1,5 @@
+module Main exposing (..)
+
 import Html exposing (..)
 import Task
 import Html.App as App
@@ -7,50 +9,65 @@ import AnimationFrame
 import CircleMenu
 import Json.Decode as Decode
 
+
 -- MODEL
 
+
 type alias Model =
-  { circleMenuModel : CircleMenu.Model
-  }
+    { circleMenuModel : CircleMenu.Model
+    }
+
 
 initialModel : Model
 initialModel =
-  { circleMenuModel = CircleMenu.initialModel
-  }
+    { circleMenuModel = CircleMenu.initialModel
+    }
+
 
 init : ( AppModel, Cmd Msg )
 init =
     ( initialModel, Cmd.none )
 
 
+
 -- MESSAGES
 
 
 type Msg
-    = ToggleMenu (Int, Int)
+    = ToggleMenu ( Int, Int )
     | CircleMenuMsg CirlceMenu.Msg
+
+
 
 -- UPDATE
 
+
 update : Msg -> AppModel -> ( AppModel, Cmd Msg )
 update message model =
-  case message of
-    ToggleMenu coords ->
+    case message of
+        ToggleMenu coords ->
+            let
+                ( updatedCircleMenuModel, circleMenuCmd ) =
+                    CircleMenu.update (CirlceMenu.ToggleMenu coords) model.circleMenuModel
+            in
+                ( { model | circleMenuModel = updatedCircleMenuModel }, Cmd.none )
 
-    CircleMenuMsg subMsg ->
-        let
-          ( updatedCircleMenuModel, circleMenuCmd ) =
-            CircleMenu.update subMsg model.circleMenuModel
-        in
-          ( { model | circleMenuModel = updatedCircleMenuModel }, Cmd.map CircleMenuMsg circleMenuCmd )
+        CircleMenuMsg subMsg ->
+            let
+                ( updatedCircleMenuModel, circleMenuCmd ) =
+                    CircleMenu.update subMsg model.circleMenuModel
+            in
+                ( { model | circleMenuModel = updatedCircleMenuModel }, Cmd.map CircleMenuMsg circleMenuCmd )
 
 
 
 -- VIEW
 
+
 viewStyle : Attribute msg
 viewStyle =
-  style [ ("backgroundColor", "#073F52") ]
+    style [ ( "backgroundColor", "#073F52" ) ]
+
 
 view : AppModel -> Html Msg
 view model =
@@ -58,18 +75,18 @@ view model =
         [ viewStyle
         , on "click" (decodeClickLocation ToggleMenu)
         ]
-        [Html.App.map CircleMenuMsg (CircleMenuMsg.view model.circleMenuModel)
+        [ Html.App.map CircleMenuMsg (CircleMenuMsg.view model.circleMenuModel)
         ]
 
 
-decodeClickLocation : Decode.Decoder (Int,Int)
+decodeClickLocation : Decode.Decoder ( Int, Int )
 decodeClickLocation =
     Decode.object2 (,)
         (Decode.object2 (-)
-            (Decode.at ["pageX"] Decode.int)
-            (Decode.at ["target", "offsetLeft"] Decode.int)
+            (Decode.at [ "pageX" ] Decode.int)
+            (Decode.at [ "target", "offsetLeft" ] Decode.int)
         )
         (Decode.object2 (-)
-            (Decode.at ["pageY"] Decode.int)
-            (Decode.at ["target", "offsetTop"] Decode.int)
+            (Decode.at [ "pageY" ] Decode.int)
+            (Decode.at [ "target", "offsetTop" ] Decode.int)
         )
