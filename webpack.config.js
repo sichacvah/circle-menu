@@ -1,4 +1,7 @@
 var path = require("path");
+var IconsPlugin = require('icons-loader/IconsPlugin');
+
+const RUN_TIMESTAMP = Math.round(Date.now() / 1000);
 
 module.exports = {
   entry: {
@@ -11,6 +14,7 @@ module.exports = {
     path: path.resolve(__dirname + '/dist'),
     filename: '[name].js',
   },
+
 
   module: {
     loaders: [
@@ -38,7 +42,7 @@ module.exports = {
       {
         test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         loader: 'file-loader',
-      },
+      }
     ],
 
     noParse: /\.elm$/,

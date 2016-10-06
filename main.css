@@ -3,7 +3,13 @@ body {
   background-position: center;
   background-size: cover;
   overflow: hidden;
+}
 
+.radialnav-sector {
+  fill: rgba(255, 255, 255, .3);
+  stroke: rgba(255, 255, 255, .1);
+  stroke-width: 1;
+  transition: all .4s;
 }
 
 html,

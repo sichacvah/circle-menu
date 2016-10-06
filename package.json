@@ -28,5 +28,8 @@
     "webpack": "^1.13.2",
     "webpack-dev-middleware": "^1.8.3",
     "webpack-dev-server": "^1.16.1"
+  },
+  "devDependencies": {
+    "icons-loader": "0.0.6"
   }
 }

@@ -29,7 +29,7 @@ type alias Button =
 init : Model
 init =
     { size = Size 0 0
-    , buttons = [ Button "search", Button "finde", Button "all", Button "fix", Button "time" ]
+    , buttons = [ Button "search", Button "finde", Button "all", Button "fix", Button "time", Button "time" ]
     }
 
 
@@ -194,14 +194,10 @@ type alias SvgProps =
 renderButton : SvgProps -> Int -> Button -> Html msg
 renderButton { r1, r2, angle, c } index button =
     Svg.g
-        [ Svg.Attributes.transform ("r" ++ (toString <| angle * (toFloat index)))
-        ]
+        [Svg.Attributes.transform ("rotate(" ++ (toString <| angle * (toFloat index)) ++"," ++ (toString c) ++ "," ++ (toString c) ++ ")")]
         [ Svg.path
             [ d <| describeSector c c r1 r2 0 angle
-            , fill "#fff"
-            , fillOpacity ".2"
-            , stroke "#fff"
-            , strokeWidth "2px"
+            , class "radialnav-sector"
             ]
             []
         ]

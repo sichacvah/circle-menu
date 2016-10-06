@@ -1,7 +1,9 @@
 'use strict';
 
 require('./main.css');
+var icons = require('./icons.svg');
 // Require index.html so it gets copied to dist
+console.log(icons);
 require('./index.html');
 
 var Elm = require('./Main.elm');
