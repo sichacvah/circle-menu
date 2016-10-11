@@ -9,16 +9,48 @@ body {
   fill: rgba(255, 255, 255, .3);
   stroke: rgba(255, 255, 255, .1);
   stroke-width: 1;
-  transition: all .4s;
+  /*transition: all .4s;*/
+}
+
+.radialnav-sector.active {
+  fill: rgba(255, 255, 255, .9);
 }
 
 html,
 body {
   width: 100%;
   height: 100%;
+  -webkit-font-smoothing: antialiased;
+  cursor: pointer;
 }
 
 * {
   margin: 0;
   padding: 0;
+}
+
+.material-icons .orange600 {
+  color: red;
+}
+
+.radialnav {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.hide {
+  display: none;
+}
+
+.radialnav-hint {
+  text-anchor: middle;
+  fill: #eee;
+  font: bold .95em 'PT Sans', Arial, sans-serif;
+  text-transform: uppercase;
+  transition: all .4s;
+  opacity: 0;
+}
+
+.radialnav-hint.active {
+  opacity: 1;
 }
