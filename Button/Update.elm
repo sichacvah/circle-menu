@@ -47,16 +47,21 @@ updateButton msg model =
                     now =
                         model.clock
 
+                    state =
+                        model.state
+
                     small_r =
                         fst model.outerRadiusRange
                 in
-                    if model.state == Here then
-                        { model
-                            | outerRadius = retarget now small_r model.outerRadius |> duration 200
-                            , state = Shrinking
-                        }
-                    else
-                        model
+                    case model.state of
+                        Here ->
+                            { model | outerRadius = retarget now small_r model.outerRadius |> duration 200, state = Shrinking }
+
+                        Growing ->
+                            { model | outerRadius = undo now model.outerRadius |> duration 200, state = Shrinking }
+
+                        _ ->
+                            model
 
         DeActivate id ->
             if id /= model.id then
@@ -66,19 +71,30 @@ updateButton msg model =
                     now =
                         model.clock
 
+                    state =
+                        model.state
+
                     growingOrBig =
                         model.state == Small || model.state == Shrinking
 
                     big_r =
                         snd model.outerRadiusRange
                 in
-                    if growingOrBig then
-                        { model
-                            | outerRadius = undo now model.outerRadius |> duration 500 |> ease outElastic
-                            , state = Growing
-                        }
-                    else
-                        model
+                    case model.state of
+                        Small ->
+                            { model
+                                | outerRadius = retarget now big_r model.outerRadius |> duration 500 |> ease outElastic
+                                , state = Growing
+                            }
+
+                        Shrinking ->
+                            { model
+                                | outerRadius = undo now model.outerRadius |> duration 500 |> ease outElastic
+                                , state = Growing
+                            }
+
+                        _ ->
+                            model
 
 
 update : Msg -> List Button -> ( List Button, Cmd Msg )

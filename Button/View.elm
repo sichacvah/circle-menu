@@ -5,6 +5,7 @@ import Button.Msg exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events
+import Svg.Keyed
 import Animation exposing (animate)
 import Button.Msg exposing (Msg(..))
 import Button.Model exposing (Button)
@@ -91,21 +92,23 @@ type alias Cartesian =
 
 view : List Button -> Html Msg
 view buttons =
-    Svg.g
+    Svg.Keyed.node
+        "g"
         [ class "radialnav" ]
         (List.indexedMap renderButton buttons)
 
 
-renderButton : Int -> Button -> Html Msg
+renderButton : Int -> Button -> ( String, Html Msg )
 renderButton index model =
     let
         outerRadius =
             Animation.animate model.clock model.outerRadius
     in
-        Svg.g
+        ( (toString index)
+        , Svg.g
             [ Svg.Attributes.transform <| rotateButton model index
-            , Svg.Events.onMouseOver (Activate model.id)
             , Svg.Events.onMouseOut (DeActivate model.id)
+            , Svg.Events.onMouseOver (Activate model.id)
             ]
             [ Svg.path
                 [ d <|
@@ -118,16 +121,17 @@ renderButton index model =
                         model.angle
                 , class <|
                     "radialnav-sector "
-                        ++ (if model.active then
+                        ++ (if model.state == Button.Model.Small || model.state == Button.Model.Shrinking then
                                 "active"
                             else
                                 ""
                            )
                 ]
                 []
-              -- , renderIcon model outerRadius
-              -- , renderHint model
+            , renderIcon model outerRadius
+            , renderHint model
             ]
+        )
 
 
 rotateButton : Button -> Int -> String
@@ -145,7 +149,7 @@ renderIcon : Button -> Float -> Html msg
 renderIcon button outerRadius =
     Svg.image
         [ xlinkHref <|
-            if button.active then
+            if button.state == Button.Model.Small || button.state == Button.Model.Shrinking then
                 button.activeIconSrc
             else
                 button.iconSrc
@@ -171,7 +175,12 @@ renderHint button =
         Svg.text'
             [ x "0"
             , y "0"
-            , class <| "radialnav-hint hide"
+            , class <|
+                "radialnav-hint "
+                    ++ if button.state == Button.Model.Small then
+                        "active"
+                       else
+                        "hide"
             ]
             [ createDefs pathId button
             , Svg.textPath
@@ -187,7 +196,7 @@ createDefs pathId button =
     Svg.defs
         []
         [ Svg.path
-            [ d <| describeArc button.x button.y (500 * 0.8) 0 button.angle False
+            [ d <| describeArc button.x button.y (snd button.outerRadiusRange) 0 button.angle False
             , id pathId
             ]
             []

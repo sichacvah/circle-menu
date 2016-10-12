@@ -19,7 +19,6 @@ type alias Button =
     { hint : String
     , iconSrc : String
     , activeIconSrc : String
-    , active : Bool
     , angle : Float
     , innerRadius : Float
     , outerRadius : Animation
@@ -56,12 +55,11 @@ initBtn angle x y outerRadius innerRadius index ( id, hint, iconSrc ) =
         { hint = hint
         , iconSrc = imgDir ++ iconSrc ++ ext
         , activeIconSrc = imgDir ++ active ++ iconSrc ++ ext
-        , active = False
         , id = id
         , angle = angle
         , innerRadius = innerRadius
         , outerRadius = static outerRadius
-        , outerRadiusRange = ( outerRadius - 15, outerRadius )
+        , outerRadiusRange = ( outerRadius - 12, outerRadius )
         , x = x
         , y = y
         , clock = 0
