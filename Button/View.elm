@@ -149,7 +149,7 @@ renderIcon : Button -> Float -> Html msg
 renderIcon button outerRadius =
     Svg.image
         [ xlinkHref <|
-            if button.state == Button.Model.Small || button.state == Button.Model.Shrinking then
+            if button.state == Button.Model.Small then
                 button.activeIconSrc
             else
                 button.iconSrc
@@ -179,8 +179,10 @@ renderHint button =
                 "radialnav-hint "
                     ++ if button.state == Button.Model.Small then
                         "active"
-                       else
+                       else if button.state == Button.Model.Here then
                         "hide"
+                       else
+                        ""
             ]
             [ createDefs pathId button
             , Svg.textPath
