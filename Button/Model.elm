@@ -1,12 +1,18 @@
 module Button.Model exposing (..)
 
 import Time exposing (Time, millisecond)
+import Animation exposing (static, Animation)
 
 
 type State
     = Growing
     | Shrinking
     | Here
+    | Small
+
+
+type alias OuterRadiusRange =
+    ( Float, Float )
 
 
 type alias Button =
@@ -16,12 +22,13 @@ type alias Button =
     , active : Bool
     , angle : Float
     , innerRadius : Float
-    , outerRadius : Float
+    , outerRadius : Animation
     , x : Float
     , y : Float
     , id : Int
     , clock : Time
     , state : State
+    , outerRadiusRange : OuterRadiusRange
     }
 
 
@@ -53,7 +60,8 @@ initBtn angle x y outerRadius innerRadius index ( id, hint, iconSrc ) =
         , id = id
         , angle = angle
         , innerRadius = innerRadius
-        , outerRadius = outerRadius
+        , outerRadius = static outerRadius
+        , outerRadiusRange = ( outerRadius - 15, outerRadius )
         , x = x
         , y = y
         , clock = 0

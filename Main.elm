@@ -34,8 +34,8 @@ init =
 
 
 
-
 -- UPDATE
+
 
 type Msg
     = DoNothing
@@ -51,8 +51,10 @@ update msg model =
                     Button.Update.update buttonMsg model.buttons
             in
                 ( { model | buttons = updatedButtons }, Cmd.map ButtonMsg buttonCmd )
+
         _ ->
             ( model, Cmd.none )
+
 
 
 -- SUBSCRIPTIONS

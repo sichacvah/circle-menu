@@ -1,96 +1,84 @@
 module Button.Update exposing (..)
 
-import Button.Model exposing (Button, Direction(..))
+import Button.Model exposing (Button, State(..))
 import Button.Msg exposing (Msg(..))
 import Debug
 import AnimationFrame
 import Time exposing (Time, millisecond)
-import Ease exposing (inOutCubic, inOutElastic, Easing)
-
-
-getDirection : Bool -> Direction
-getDirection isActive =
-    if isActive then
-        Inside
-    else
-        Outside
-
-
-animationIsDone : Time -> Time -> Time -> Bool
-animationIsDone start duration current =
-    current - start >= duration
-
-
-fr : Button -> Easing -> Float
-fr button easing =
-    let
-        start =
-            button.animationParams.start
-
-        current =
-            button.currentTime
-
-        duration =
-            button.animationParams.duration
-    in
-        easing (clamp 0 1 <| (current - start) / duration)
+import Animation exposing (..)
+import Ease exposing (inOutCubic, outElastic, Easing)
 
 
 updateButton : Msg -> Button -> Button
-updateButton msg button =
-    let
-        animationParams =
-            button.animationParams
-
-        updateAnimParams direction =
-            { animationParams | animationIsRunning = True, animationDirection = direction, start = button.currentTime }
-
-        toggleActivate button id isActive =
-            if (button.id == id) then
-                { button | active = isActive, animationParams = updateAnimParams (getDirection isActive) }
-            else
-                button
-
-        tickAnim button =
+updateButton msg model =
+    case msg of
+        Tick t ->
             let
-                delta =
-                    animationParams.fromRadius - animationParams.toRadius
+                clock =
+                    model.clock + t
+
+                radiusDone =
+                    isDone clock model.outerRadius
+
+                state =
+                    case model.state of
+                        Growing ->
+                            if radiusDone then
+                                Here
+                            else
+                                Growing
+
+                        Shrinking ->
+                            if radiusDone then
+                                Small
+                            else
+                                Shrinking
+
+                        _ ->
+                            model.state
             in
-                case button.animationParams.animationDirection of
-                    Inside ->
-                        if animationIsDone animationParams.start animationParams.duration button.currentTime then
-                            { button
-                                | outerRadius = animationParams.toRadius
-                                , animationParams = { animationParams | animationIsRunning = False }
-                            }
-                        else
-                            { button | outerRadius = animationParams.fromRadius - (fr button inOutCubic) * delta }
+                { model | clock = clock, state = state }
 
-                    Outside ->
-                        if animationIsDone animationParams.start animationParams.duration button.currentTime then
-                            { button
-                                | outerRadius = animationParams.fromRadius
-                                , animationParams = { animationParams | animationIsRunning = False }
-                            }
-                        else
-                            { button | outerRadius = animationParams.toRadius + (fr button inOutElastic ) * delta }
-    in
-        case msg of
-            Activate id ->
-                toggleActivate button id True
-
-            DeActivate id ->
-                toggleActivate button id False
-
-            Tick time ->
+        Activate id ->
+            if id /= model.id then
+                model
+            else
                 let
-                    updatedButton =
-                        { button | currentTime = time }
+                    now =
+                        model.clock
+
+                    small_r =
+                        fst model.outerRadiusRange
                 in
-                    if button.animationParams.animationIsRunning then
-                        tickAnim updatedButton
+                    if model.state == Here then
+                        { model
+                            | outerRadius = retarget now small_r model.outerRadius |> duration 200
+                            , state = Shrinking
+                        }
                     else
-                        updatedButton
+                        model
+
+        DeActivate id ->
+            if id /= model.id then
+                model
+            else
+                let
+                    now =
+                        model.clock
+
+                    growingOrBig =
+                        model.state == Small || model.state == Shrinking
+
+                    big_r =
+                        snd model.outerRadiusRange
+                in
+                    if growingOrBig then
+                        { model
+                            | outerRadius = undo now model.outerRadius |> duration 500 |> ease outElastic
+                            , state = Growing
+                        }
+                    else
+                        model
 
 
 update : Msg -> List Button -> ( List Button, Cmd Msg )
@@ -108,7 +96,4 @@ update msg buttons =
 
 subscriptions : List Button -> Sub Msg
 subscriptions buttons =
-    if List.any (\button -> button.animationParams.animationIsRunning) buttons then
-        Sub.batch [ AnimationFrame.times Tick ]
-    else
-        Sub.none
+    Sub.batch [ AnimationFrame.diffs Tick ]
