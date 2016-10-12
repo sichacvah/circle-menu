@@ -73,7 +73,7 @@ updateButton msg button =
                                 , animationParams = { animationParams | animationIsRunning = False }
                             }
                         else
-                            { button | outerRadius = animationParams.toRadius + (fr button inOutElastic ) * delta }
+                            { button | outerRadius = animationParams.toRadius + (fr button inOutElastic) * delta }
     in
         case msg of
             Activate id ->
@@ -108,7 +108,4 @@ update msg buttons =
 
 subscriptions : List Button -> Sub Msg
 subscriptions buttons =
-    if List.any (\button -> button.animationParams.animationIsRunning) buttons then
-        Sub.batch [ AnimationFrame.times Tick ]
-    else
-        Sub.none
+    Sub.batch [ AnimationFrame.times Tick ]

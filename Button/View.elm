@@ -10,6 +10,7 @@ import Button.Msg exposing (Msg(..))
 import Button.Model exposing (Button)
 import Html exposing (Html)
 
+
 polarToCartesian : Float -> Float -> Float -> Float -> Cartesian
 polarToCartesian cx cy r a =
     let
@@ -90,9 +91,10 @@ type alias Cartesian =
 
 view : List Button -> Html Msg
 view buttons =
-  Svg.g
-    [ class "radialnav" ]
-    (List.indexedMap renderButton buttons)
+    Svg.g
+        [ class "radialnav" ]
+        (List.indexedMap renderButton buttons)
+
 
 renderButton : Int -> Button -> Html Msg
 renderButton index model =
@@ -118,39 +120,39 @@ renderButton index model =
                             ""
                        )
             ]
-            []
-        -- , renderIcon model
-        -- , renderHint model
+            [ renderIcon model
+            ]
+          -- , renderHint model
         ]
 
+
 rotateButton : Button -> Int -> String
-rotateButton  button index =
-  "rotate("
-    ++ (toString <| button.angle * (toFloat index))
-    ++ ","
-    ++ (toString button.x)
-    ++ ","
-    ++ (toString button.y)
-    ++ ")"
+rotateButton button index =
+    "rotate("
+        ++ (toString <| button.angle * (toFloat index))
+        ++ ","
+        ++ (toString button.x)
+        ++ ","
+        ++ (toString button.y)
+        ++ ")"
+
 
 renderIcon : Button -> Html msg
 renderIcon button =
-
-             Svg.image
-                [ xlinkHref <|
-                    if button.active then
-                        button.activeIconSrc
-                    else
-                        button.iconSrc
-                , width "24"
-                , height "24"
-                , x << toString <| button.x - 12
-                , y << toString <| button.y - 12 - button.outerRadius + button.innerRadius
-                , class <| "radialnav-icon"
-                , Svg.Attributes.transform ("rotate(" ++ (toString <| button.angle / 2) ++ "," ++ (toString button.x) ++ "," ++ (toString button.y) ++ ")")
-                ]
-                []
-
+    Svg.image
+        [ xlinkHref <|
+            if button.active then
+                button.activeIconSrc
+            else
+                button.iconSrc
+        , width "24"
+        , height "24"
+        , x << toString <| button.x - 12
+        , y << toString <| button.y - 15 - button.outerRadius + button.innerRadius
+        , class <| "radialnav-icon"
+        , Svg.Attributes.transform ("rotate(" ++ (toString <| button.angle / 2) ++ "," ++ (toString button.x) ++ "," ++ (toString button.y) ++ ")")
+        ]
+        []
 
 
 renderHint : Button -> Html msg

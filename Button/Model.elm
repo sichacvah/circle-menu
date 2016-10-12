@@ -1,18 +1,22 @@
 module Button.Model exposing (..)
+
 import Time exposing (Time, millisecond)
 
+
 type Direction
-  = Inside
-  | Outside
+    = Inside
+    | Outside
+
 
 type alias AnimationParams =
-  { fromRadius : Float
-  , toRadius : Float
-  , duration : Time
-  , animationIsRunning : Bool
-  , animationDirection : Direction
-  , start : Time
-  }
+    { fromRadius : Float
+    , toRadius : Float
+    , duration : Time
+    , animationIsRunning : Bool
+    , animationDirection : Direction
+    , start : Time
+    }
+
 
 type alias Button =
     { hint : String
@@ -29,6 +33,8 @@ type alias Button =
     , currentTime : Time
     }
 
+
+
 -- TODO SET FROM APP MODEL
 
 
@@ -36,18 +42,19 @@ size : Float
 size =
     500
 
+
 newAnimationParams : Float -> AnimationParams
 newAnimationParams r =
-  AnimationParams
-    r
-    (r * 0.9)
-    (400 * millisecond)
-    False
-    Inside
-    0
+    AnimationParams
+        r
+        (r * 0.9)
+        (400 * millisecond)
+        False
+        Inside
+        0
 
 
-initBtn : Float ->  Float -> Float -> Float -> Float -> Int -> ( Int, String, String ) -> Button
+initBtn : Float -> Float -> Float -> Float -> Float -> Int -> ( Int, String, String ) -> Button
 initBtn angle x y outerRadius innerRadius index ( id, hint, iconSrc ) =
     let
         imgDir =
@@ -79,10 +86,13 @@ initialButtons size =
     let
         x =
             size / 2
+
         y =
             size / 2
+
         outerRadius =
             size * 0.25
+
         innerRadius =
             outerRadius * 0.35
 
