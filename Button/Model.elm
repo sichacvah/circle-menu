@@ -1,36 +1,36 @@
 module Button.Model exposing (..)
 
 import Time exposing (Time, millisecond)
+import Animation exposing (static, Animation)
 
 
-type Direction
-    = Inside
-    | Outside
+type State
+    = Growing
+    | Shrinking
+    | Here
+    | Small
+    | Entering
+    | Exiting
+    | Gone
 
 
-type alias AnimationParams =
-    { fromRadius : Float
-    , toRadius : Float
-    , duration : Time
-    , animationIsRunning : Bool
-    , animationDirection : Direction
-    , start : Time
-    }
+type alias OuterRadiusRange =
+    ( Float, Float )
 
 
 type alias Button =
     { hint : String
     , iconSrc : String
     , activeIconSrc : String
-    , active : Bool
     , angle : Float
-    , innerRadius : Float
-    , outerRadius : Float
+    , innerRadius : Animation
+    , outerRadius : Animation
     , x : Float
     , y : Float
     , id : Int
-    , animationParams : AnimationParams
-    , currentTime : Time
+    , clock : Time
+    , state : State
+    , outerRadiusRange : OuterRadiusRange
     }
 
 
@@ -41,17 +41,6 @@ type alias Button =
 size : Float
 size =
     500
-
-
-newAnimationParams : Float -> AnimationParams
-newAnimationParams r =
-    AnimationParams
-        r
-        (r * 0.9)
-        (400 * millisecond)
-        False
-        Inside
-        0
 
 
 initBtn : Float -> Float -> Float -> Float -> Float -> Int -> ( Int, String, String ) -> Button
@@ -69,15 +58,15 @@ initBtn angle x y outerRadius innerRadius index ( id, hint, iconSrc ) =
         { hint = hint
         , iconSrc = imgDir ++ iconSrc ++ ext
         , activeIconSrc = imgDir ++ active ++ iconSrc ++ ext
-        , active = False
         , id = id
         , angle = angle
-        , innerRadius = innerRadius
-        , outerRadius = outerRadius
+        , innerRadius = static innerRadius
+        , outerRadius = static 0
+        , outerRadiusRange = ( outerRadius - 12, outerRadius )
         , x = x
         , y = y
-        , animationParams = newAnimationParams outerRadius
-        , currentTime = 0
+        , clock = 0
+        , state = Gone
         }
 
 
