@@ -116,13 +116,15 @@ renderButton index model =
                         model.x
                         model.y
                         outerRadius
-                        model.innerRadius
+                        (Animation.animate model.clock model.innerRadius)
                         0
                         model.angle
                 , class <|
                     "radialnav-sector "
                         ++ (if model.state == Button.Model.Small || model.state == Button.Model.Shrinking then
                                 "active"
+                            else if model.state == Button.Model.Gone then
+                                "hide"
                             else
                                 ""
                            )
@@ -156,8 +158,14 @@ renderIcon button outerRadius =
         , width "24"
         , height "24"
         , x << toString <| button.x - 12
-        , y << toString <| button.y - 15 - outerRadius + button.innerRadius
-        , class <| "radialnav-icon"
+        , y << toString <| button.y - 15 - outerRadius + (Animation.animate button.clock button.innerRadius)
+        , class <|
+            "radialnav-icon "
+                ++ (if button.state == Button.Model.Gone || button.state == Button.Model.Exiting then
+                        "hide"
+                    else
+                        ""
+                   )
         , Svg.Attributes.transform ("rotate(" ++ (toString <| button.angle / 2) ++ "," ++ (toString button.x) ++ "," ++ (toString button.y) ++ ")")
         ]
         []

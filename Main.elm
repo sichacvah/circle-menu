@@ -10,8 +10,12 @@ import Button.Model exposing (Button, initialButtons)
 import Button.View
 import Button.Msg
 import Button.Update
+import Debug
 import Time exposing (Time)
 import AnimationFrame
+import Json.Decode as Json exposing (..)
+import Window exposing (Size)
+import Task
 
 
 -- MODEL
@@ -19,6 +23,8 @@ import AnimationFrame
 
 type alias Model =
     { buttons : List Button
+    , menuShowed : Bool
+    , size : Size
     }
 
 
@@ -30,6 +36,8 @@ size =
 init : Model
 init =
     { buttons = (initialButtons size)
+    , menuShowed = False
+    , size = Size 0 0
     }
 
 
@@ -40,6 +48,8 @@ init =
 type Msg
     = DoNothing
     | ButtonMsg Button.Msg.Msg
+    | ToggleMenu Float Float
+    | SizeChange Size
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -52,6 +62,23 @@ update msg model =
             in
                 ( { model | buttons = updatedButtons }, Cmd.map ButtonMsg buttonCmd )
 
+        ToggleMenu x y ->
+            if Debug.log "SHOWED" model.menuShowed then
+                let
+                    ( updatedButtons, buttonCmd ) =
+                        Button.Update.update (Button.Msg.HideAll) model.buttons
+                in
+                    ( { model | buttons = updatedButtons, menuShowed = False }, Cmd.map ButtonMsg buttonCmd )
+            else
+                let
+                    ( updatedButtons, buttonCmd ) =
+                        Button.Update.update (Button.Msg.ShowAll x y) model.buttons
+                in
+                    ( { model | buttons = updatedButtons, menuShowed = True }, Cmd.map ButtonMsg buttonCmd )
+
+        SizeChange size ->
+            ( { model | size = size }, Cmd.none )
+
         _ ->
             ( model, Cmd.none )
 
@@ -62,7 +89,10 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map ButtonMsg (Button.Update.subscriptions model.buttons)
+    Sub.batch
+        [ Sub.map ButtonMsg (Button.Update.subscriptions model.buttons)
+        , Window.resizes SizeChange
+        ]
 
 
 
@@ -72,18 +102,27 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     svg
-        [ viewBox <| "0 0 " ++ (toString size) ++ " " ++ (toString size)
-        , width <| toString size
-        , height <| toString size
+        [ viewBox <| "0 0 " ++ (toString model.size.width) ++ " " ++ (toString model.size.height)
+        , width <| toString model.size.width
+        , height <| toString model.size.height
         , class "radialnav"
+        , Svg.Events.on "click" eventPos
         ]
         [ App.map ButtonMsg (Button.View.view model.buttons) ]
+
+
+eventPos : Json.Decoder Msg
+eventPos =
+    Json.object2
+        ToggleMenu
+        ("clientX" := Json.float)
+        ("clientY" := Json.float)
 
 
 main : Program Never
 main =
     App.program
-        { init = ( init, Cmd.none )
+        { init = ( init, Task.perform (\_ -> DoNothing) SizeChange Window.size )
         , view = view
         , update = update
         , subscriptions = subscriptions

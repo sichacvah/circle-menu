@@ -9,6 +9,9 @@ type State
     | Shrinking
     | Here
     | Small
+    | Entering
+    | Exiting
+    | Gone
 
 
 type alias OuterRadiusRange =
@@ -20,7 +23,7 @@ type alias Button =
     , iconSrc : String
     , activeIconSrc : String
     , angle : Float
-    , innerRadius : Float
+    , innerRadius : Animation
     , outerRadius : Animation
     , x : Float
     , y : Float
@@ -57,13 +60,13 @@ initBtn angle x y outerRadius innerRadius index ( id, hint, iconSrc ) =
         , activeIconSrc = imgDir ++ active ++ iconSrc ++ ext
         , id = id
         , angle = angle
-        , innerRadius = innerRadius
-        , outerRadius = static outerRadius
+        , innerRadius = static innerRadius
+        , outerRadius = static 0
         , outerRadiusRange = ( outerRadius - 12, outerRadius )
         , x = x
         , y = y
         , clock = 0
-        , state = Here
+        , state = Gone
         }
 
 

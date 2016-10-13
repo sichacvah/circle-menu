@@ -10,9 +10,10 @@ body {
   stroke: rgba(255, 255, 255, .1);
   stroke-width: 1;
   transition: all .4s;
+  transition: path .0s;
 }
 .radialnav-icon {
-    transition: all .4s;
+  transition: src .4s;
 }
 .radialnav-sector.active {
   fill: rgba(255, 255, 255, .9);

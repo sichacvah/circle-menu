@@ -7,6 +7,7 @@ import AnimationFrame
 import Time exposing (Time, millisecond)
 import Animation exposing (..)
 import Ease exposing (inOutCubic, outElastic, Easing)
+import Random
 
 
 updateButton : Msg -> Button -> Button
@@ -34,6 +35,18 @@ updateButton msg model =
                             else
                                 Shrinking
 
+                        Entering ->
+                            if radiusDone then
+                                Here
+                            else
+                                Entering
+
+                        Exiting ->
+                            if radiusDone then
+                                Gone
+                            else
+                                Exiting
+
                         _ ->
                             model.state
             in
@@ -52,13 +65,22 @@ updateButton msg model =
 
                     small_r =
                         fst model.outerRadiusRange
+
+                    big_r =
+                        snd model.outerRadiusRange
+
+                    model' =
+                        { model | outerRadius = retarget now small_r model.outerRadius |> duration 200 |> ease Ease.linear, state = Shrinking }
                 in
                     case model.state of
                         Here ->
-                            { model | outerRadius = retarget now small_r model.outerRadius |> duration 200, state = Shrinking }
+                            { model | outerRadius = animation now |> from big_r |> to small_r |> duration 200 |> ease Ease.linear, state = Shrinking }
 
                         Growing ->
-                            { model | outerRadius = undo now model.outerRadius |> duration 200, state = Shrinking }
+                            model'
+
+                        Entering ->
+                            { model | outerRadius = animation now |> from big_r |> to small_r |> duration 200 |> ease Ease.linear, state = Shrinking }
 
                         _ ->
                             model
@@ -79,22 +101,57 @@ updateButton msg model =
 
                     big_r =
                         snd model.outerRadiusRange
+
+                    small_r =
+                        fst model.outerRadiusRange
                 in
                     case model.state of
                         Small ->
                             { model
-                                | outerRadius = retarget now big_r model.outerRadius |> duration 500 |> ease outElastic
+                                | outerRadius = animation now |> from small_r |> to big_r |> duration 500 |> ease Ease.outElastic
                                 , state = Growing
                             }
 
                         Shrinking ->
                             { model
-                                | outerRadius = undo now model.outerRadius |> duration 500 |> ease outElastic
+                                | outerRadius = retarget now big_r model.outerRadius |> duration 500 |> ease Ease.outElastic
                                 , state = Growing
                             }
 
                         _ ->
                             model
+
+        Show id x y randomElement ->
+            if id /= model.id then
+                model
+            else
+                case model.state of
+                    Gone ->
+                        { model
+                            | x = x
+                            , y = y
+                            , state = Entering
+                            , outerRadius = animation model.clock |> from 0 |> to (snd model.outerRadiusRange) |> duration (800 * randomElement + 800) |> ease Ease.outElastic
+                            , innerRadius = undo model.clock model.innerRadius |> duration 0
+                        }
+
+                    _ ->
+                        model
+
+        HideAll ->
+            case model.state of
+                Exiting ->
+                    model
+
+                _ ->
+                    { model
+                        | state = Exiting
+                        , outerRadius = animation model.clock |> from (snd model.outerRadiusRange) |> to 0 |> duration 200
+                        , innerRadius = retarget model.clock 0 model.innerRadius |> duration 200
+                    }
+
+        _ ->
+            model
 
 
 update : Msg -> List Button -> ( List Button, Cmd Msg )
@@ -108,6 +165,20 @@ update msg buttons =
 
         Tick time ->
             ( List.map (updateButton msg) buttons, Cmd.none )
+
+        Show id x y randomElement ->
+            ( List.map (updateButton msg) buttons, Cmd.none )
+
+        HideAll ->
+            ( List.map (updateButton msg) buttons, Cmd.none )
+
+        ShowAll x y ->
+            ( buttons, Cmd.batch (List.map (\btn -> Random.generate (Show btn.id x y) randomFloat) buttons) )
+
+
+randomFloat : Random.Generator Float
+randomFloat =
+    Random.float 0.5 1
 
 
 subscriptions : List Button -> Sub Msg
